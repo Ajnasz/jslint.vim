@@ -1,10 +1,38 @@
 /*jslint laxbreak: true */
 
-if (typeof require != 'undefined') {
-    JSLINT = require('./jslint-core').JSLINT;
-    print = require('sys').puts;
+
+// By default we lodad the jslint, but if there is any argument defined we will
+// load the jshint.
+var script = 'jslint-core';
+
+var isJSHINT = false;
+if (typeof require !== 'undefined') {
+    isJSHINT = !!process.argv[2];
 } else {
-    load('jslint-core.js');
+    isJSHINT = arguments.length > 0;
+}
+
+if (isJSHINT) {
+    script = 'jshint-core';
+}
+
+var LINT;
+var printMsg;
+if (typeof require !== 'undefined') {
+    /*global require: true*/
+    var LINT = require('./' + script)[isJSHINT ? 'JSHINT' : 'JSLINT'];
+    printMsg = require('util').puts;
+} else {
+    load(script + '.js');
+    if (isJSHINT) {
+        /*global JSHINT: true*/
+        LINT = JSHINT;
+    } else {
+        /*global JSLINT: true*/
+        LINT = JSLINT;
+    }
+    printMsg = print;
+
 }
 
 // Import extra libraries if running in Rhino.
@@ -69,8 +97,8 @@ var readSTDIN = (function() {
     }
 })();
 
-readSTDIN(function(body) {
-    var ok = JSLINT(body)
+readSTDIN(function (body) {
+    var ok = LINT(body)
       , i
       , error
       , errorType
@@ -80,17 +108,17 @@ readSTDIN(function(body) {
       , ERROR = 'ERROR';
 
     if (!ok) {
-        errorCount = JSLINT.errors.length;
+        errorCount = LINT.errors.length;
         for (i = 0; i < errorCount; i += 1) {
-            error = JSLINT.errors[i];
+            error = LINT.errors[i];
             errorType = WARN;
-            nextError = i < errorCount ? JSLINT.errors[i+1] : null;
+            nextError = i < errorCount ? LINT.errors[i + 1] : null;
             if (error && error.reason && error.reason.match(/^Stopping/) === null) {
                 // If jslint stops next, this was an actual error
                 if (nextError && nextError.reason && nextError.reason.match(/^Stopping/) !== null) {
                     errorType = ERROR;
                 }
-                print([error.line, error.character, errorType, error.reason].join(":"));
+                printMsg([error.line, error.character, errorType, error.reason].join(":"));
             }
         }
     }

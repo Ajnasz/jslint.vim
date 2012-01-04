@@ -35,6 +35,9 @@ au CursorMoved <buffer> call s:GetJSLintMessage()
 if !exists("g:JSLintHighlightErrorLine")
   let g:JSLintHighlightErrorLine = 1
 endif
+if !exists("g:JSLintUseJSHint")
+  let g:JSLintUseJSHint = 0
+endif
 
 if !exists("g:JSLintQuickFixWindow")
   let g:JSLintQuickFixWindow = 0
@@ -89,6 +92,10 @@ if has('win32')
   let s:plugin_path = substitute(s:plugin_path, '/', '\', 'g')
 endif
 let s:cmd = "cd " . s:plugin_path . " && " . s:cmd . " " . s:plugin_path . "runjslint." . s:runjslint_ext
+
+if g:JSLintUseJSHint == 1
+  let s:cmd = s:cmd . " 1"
+endif
 
 let s:jslintrc_file = expand('~/.jslintrc')
 if filereadable(s:jslintrc_file)
