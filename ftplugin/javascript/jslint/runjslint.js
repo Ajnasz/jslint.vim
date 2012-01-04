@@ -1,4 +1,5 @@
 /*jslint laxbreak: true */
+/*jshint laxbreak: true */
 
 
 // By default we lodad the jslint, but if there is any argument defined we will
@@ -36,36 +37,38 @@ if (typeof require !== 'undefined') {
 }
 
 // Import extra libraries if running in Rhino.
-if (typeof importPackage != 'undefined') {
+if (typeof importPackage !== 'undefined') {
     importPackage(java.io);
     importPackage(java.lang);
 }
 
-var readSTDIN = (function() {
+var readSTDIN = (function () {
     // readSTDIN() definition for nodejs
-    if (typeof process != 'undefined' && process.openStdin) {
+    /*global process: true*/
+    if (typeof process !== 'undefined' && process.openStdin) {
         return function readSTDIN(callback) {
             var stdin = process.openStdin()
               , body = [];
 
-            stdin.on('data', function(chunk) {
+            stdin.on('data', function (chunk) {
                 body.push(chunk);
             });
 
-            stdin.on('end', function(chunk) {
+            stdin.on('end', function (chunk) {
                 callback(body.join('\n'));
             });
         };
 
     // readSTDIN() definition for Rhino
-    } else if (typeof BufferedReader != 'undefined') {
+    } else if (typeof BufferedReader !== 'undefined') {
         return function readSTDIN(callback) {
             // setup the input buffer and output buffer
+            /*global System: true, InputStreamReader: true, BufferedReader: true*/
             var stdin = new BufferedReader(new InputStreamReader(System['in'])),
                 lines = [];
 
             // read stdin buffer until EOF (or skip)
-            while (stdin.ready()){
+            while (stdin.ready()) {
                 lines.push(stdin.readLine());
             }
 
@@ -73,13 +76,14 @@ var readSTDIN = (function() {
         };
 
     // readSTDIN() definition for Spidermonkey
-    } else if (typeof readline != 'undefined') {
+    } else if (typeof readline !== 'undefined') {
         return function readSTDIN(callback) {
             var line
               , input = []
               , emptyCount = 0
               , i;
 
+            /*global readline: true */
             line = readline();
             while (emptyCount < 25) {
                 input.push(line);
@@ -95,7 +99,7 @@ var readSTDIN = (function() {
             callback(input.join('\n'));
         };
     }
-})();
+}());
 
 readSTDIN(function (body) {
     var ok = LINT(body)
@@ -123,3 +127,4 @@ readSTDIN(function (body) {
         }
     }
 });
+
