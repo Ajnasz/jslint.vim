@@ -1,7 +1,6 @@
 /*jslint laxbreak: true */
 /*jshint laxbreak: true */
 
-
 // By default we lodad the jslint, but if there is any argument defined we will
 // load the jshint.
 var script = 'jslint-core';
@@ -18,11 +17,15 @@ if (isJSHINT) {
 }
 
 var LINT;
-var printMsg;
+var fs, vm, sandbox, jslintCore = 'jslint-core.js', res;
+
 if (typeof require !== 'undefined') {
-    /*global require: true*/
-    var LINT = require('./' + script)[isJSHINT ? 'JSHINT' : 'JSLINT'];
-    printMsg = require('util').puts;
+    print = require('util').puts;
+    fs = require('fs');
+    vm = require('vm');
+    sandbox = {};
+    res = vm.runInNewContext(fs.readFileSync(jslintCore), sandbox, jslintCore);
+    JSLINT = isJSHINT ? sandbox.JSLINT : sandbox.JSLINT;
 } else {
     load(script + '.js');
     if (isJSHINT) {
@@ -32,8 +35,6 @@ if (typeof require !== 'undefined') {
         /*global JSLINT: true*/
         LINT = JSLINT;
     }
-    printMsg = print;
-
 }
 
 // Import extra libraries if running in Rhino.
@@ -122,7 +123,7 @@ readSTDIN(function (body) {
                 if (nextError && nextError.reason && nextError.reason.match(/^Stopping/) !== null) {
                     errorType = ERROR;
                 }
-                printMsg([error.line, error.character, errorType, error.reason].join(":"));
+                print([error.line, error.character, errorType, error.reason].join(":"));
             }
         }
     }
