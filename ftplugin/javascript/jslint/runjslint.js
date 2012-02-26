@@ -3,7 +3,8 @@
 
 // By default we lodad the jslint, but if there is any argument defined we will
 // load the jshint.
-var script = 'jslint-core';
+var JSLINT;
+var fs, vm, sandbox, jslintCore = 'jslint-core.js', res;
 
 var isJSHINT = false;
 if (typeof require !== 'undefined') {
@@ -13,27 +14,26 @@ if (typeof require !== 'undefined') {
 }
 
 if (isJSHINT) {
-    script = 'jshint-core';
+    jslintCore = 'jshint-core.js';
 }
 
-var LINT;
-var fs, vm, sandbox, jslintCore = 'jslint-core.js', res;
 
 if (typeof require !== 'undefined') {
+    /*jslint node: true */
     print = require('util').puts;
     fs = require('fs');
     vm = require('vm');
     sandbox = {};
     res = vm.runInNewContext(fs.readFileSync(jslintCore), sandbox, jslintCore);
-    JSLINT = isJSHINT ? sandbox.JSLINT : sandbox.JSLINT;
+    JSLINT = isJSHINT ? sandbox.JSHINT : sandbox.JSLINT;
 } else {
-    load(script + '.js');
+    load(jslintCore + '.js');
     if (isJSHINT) {
         /*global JSHINT: true*/
-        LINT = JSHINT;
+        JSLINT = JSHINT;
     } else {
         /*global JSLINT: true*/
-        LINT = JSLINT;
+        JSLINT = JSLINT;
     }
 }
 
@@ -103,7 +103,7 @@ var readSTDIN = (function () {
 }());
 
 readSTDIN(function (body) {
-    var ok = LINT(body)
+    var ok = JSLINT(body)
       , i
       , error
       , errorType
@@ -113,11 +113,11 @@ readSTDIN(function (body) {
       , ERROR = 'ERROR';
 
     if (!ok) {
-        errorCount = LINT.errors.length;
+        errorCount = JSLINT.errors.length;
         for (i = 0; i < errorCount; i += 1) {
-            error = LINT.errors[i];
+            error = JSLINT.errors[i];
             errorType = WARN;
-            nextError = i < errorCount ? LINT.errors[i + 1] : null;
+            nextError = i < errorCount ? JSLINT.errors[i + 1] : null;
             if (error && error.reason && error.reason.match(/^Stopping/) === null) {
                 // If jslint stops next, this was an actual error
                 if (nextError && nextError.reason && nextError.reason.match(/^Stopping/) !== null) {
