@@ -43,6 +43,14 @@ if !exists("g:JSLintQuickFixWindow")
   let g:JSLintQuickFixWindow = 0
 endif
 
+if !exists("g:JSLintScriptFile")
+  let g:JSLintScriptFile = "jslint-core"
+endif
+
+if !exists("g:JSLintQuickFixWindow")
+  let g:JSLintQuickFixWindow = 0
+endif
+
 if !exists("*s:JSLintUpdate")
   function s:JSLintUpdate(...)
     let l:quickfix = a:0 > 0 && a:1 == 1
@@ -94,7 +102,11 @@ endif
 let s:cmd = "cd " . s:plugin_path . " && " . s:cmd . " " . s:plugin_path . "runjslint." . s:runjslint_ext
 
 if g:JSLintUseJSHint == 1
-  let s:cmd = s:cmd . " 1"
+    g:JSLintScriptFile = "jshint-core"
+endif
+let s:cmd = s:cmd . " --linter=" . g:JSLintScriptFile
+if g:JSLintUseJSHint == 1
+    let s:cmd = s:cmd . " --is-jshint=1"
 endif
 
 let s:jslintrc_file = expand('~/.jslintrc')
@@ -184,6 +196,7 @@ function! s:JSLint(...)
   let b:jslint_output = system(s:cmd, lines . "\n")
   if v:shell_error
     echoerr 'could not invoke JSLint!'
+    echoerr b:jslint_output
     let b:jslint_disabled = 1
   end
 

@@ -2,30 +2,40 @@
 /*jshint laxbreak: true */
 
 
+var isNode = typeof require !== 'undefined';
+
 // By default we lodad the jslint, but if there is any argument defined we will
 // load the jshint.
-var script = 'jslint-core';
+var options = {
+	scriptFile: 'jslint-core',
+	isJSHint: false
+};
 
-var isJSHINT = false;
-if (typeof require !== 'undefined') {
-    isJSHINT = !!process.argv[2];
-} else {
-    isJSHINT = arguments.length > 0;
-}
+// processing arguments
+process.argv.slice(2).forEach(function (arg) {
+	var argParse;
+	argParse = arg.split('=');
+	argParse.shift();
+	argParse = argParse.join('=');
+	if (arg.indexOf('--linter') === 0) {
+		options.scriptFile = argParse;
+	} else if (arg.indexOf('--is-jshint') === 0) {
+		console.error(arg);
+		options.isJSHint = !!argParse;
+	}
+});
 
-if (isJSHINT) {
-    script = 'jshint-core';
-}
+var script = options.scriptFile;
 
 var LINT;
 var printMsg;
-if (typeof require !== 'undefined') {
+if (isNode) {
     /*global require: true*/
-    var LINT = require('./' + script)[isJSHINT ? 'JSHINT' : 'JSLINT'];
+    var LINT = require(script)[options.isJSHint ? 'JSHINT' : 'JSLINT'];
     printMsg = require('util').puts;
 } else {
     load(script + '.js');
-    if (isJSHINT) {
+    if (options.isJSHint) {
         /*global JSHINT: true*/
         LINT = JSHINT;
     } else {
@@ -33,7 +43,6 @@ if (typeof require !== 'undefined') {
         LINT = JSLINT;
     }
     printMsg = print;
-
 }
 
 // Import extra libraries if running in Rhino.
