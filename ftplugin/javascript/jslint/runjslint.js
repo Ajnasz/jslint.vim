@@ -28,14 +28,14 @@ var script = options.scriptFile;
 
 var LINT;
 
-var fs, vm, sandbox, jslintCore = 'jslint-core.js';
+var fs, vm, sandbox;
 
 if (isNode) {
     print = require('util').puts;
     fs = require('fs');
     vm = require('vm');
     sandbox = {};
-    res = vm.runInNewContext(fs.readFileSync(jslintCore), sandbox, jslintCore);
+    res = vm.runInNewContext(fs.readFileSync(script), sandbox, script);
 	if (options.isJSHint) {
 		/*global JSHINT: true*/
 		LINT = sandbox.JSHINT;

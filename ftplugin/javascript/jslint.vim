@@ -44,7 +44,7 @@ if !exists("g:JSLintQuickFixWindow")
 endif
 
 if !exists("g:JSLintScriptFile")
-  let g:JSLintScriptFile = "jslint-core"
+  let g:JSLintScriptFile = "jslint-core.js"
 endif
 
 if !exists("g:JSLintQuickFixWindow")
@@ -115,7 +115,7 @@ else
 endif
 
 if g:JSLintUseJSHint == 1
-    g:JSLintScriptFile = "jshint-core"
+    g:JSLintScriptFile = "jshint-core.js"
 endif
 let s:cmd = s:cmd . " --linter=" . g:JSLintScriptFile
 if g:JSLintUseJSHint == 1
