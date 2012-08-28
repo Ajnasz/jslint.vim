@@ -24,27 +24,31 @@ process.argv.slice(2).forEach(function (arg) {
 	}
 });
 
-var script = options.scriptFile;
+var jslintCore = options.scriptFile;
 
-var LINT;
-
-var fs, vm, sandbox;
+var JSLINT;
+var fs, vm, sandbox, res;
 
 if (isNode) {
+    /*jslint node: true */
     print = require('util').puts;
     fs = require('fs');
     vm = require('vm');
     sandbox = {};
-    res = vm.runInNewContext(fs.readFileSync(script), sandbox, script);
+    res = vm.runInNewContext(fs.readFileSync(jslintCore), sandbox, jslintCore);
 	if (options.isJSHint) {
 		/*global JSHINT: true*/
 		LINT = sandbox.JSHINT;
 	} else {
 		/*global JSLINT: true*/
-		LINT = sandbox.JSLINT;
+		JSLINT = sandbox.JSLINT;
 	}
 } else {
-    load(script + '.js');
+    load(jslintCore + '.js');
+	if (options.isJSHint) {
+		/*global JSHINT: true*/
+		JSLINT = JSHINT;
+	}
 }
 
 // Import extra libraries if running in Rhino.
@@ -113,7 +117,7 @@ var readSTDIN = (function () {
 }());
 
 readSTDIN(function (body) {
-    var ok = LINT(body)
+    var ok = JSLINT(body)
       , i
       , error
       , errorType
@@ -123,11 +127,11 @@ readSTDIN(function (body) {
       , ERROR = 'ERROR';
 
     if (!ok) {
-        errorCount = LINT.errors.length;
+        errorCount = JSLINT.errors.length;
         for (i = 0; i < errorCount; i += 1) {
-            error = LINT.errors[i];
+            error = JSLINT.errors[i];
             errorType = WARN;
-            nextError = i < errorCount ? LINT.errors[i + 1] : null;
+            nextError = i < errorCount ? JSLINT.errors[i + 1] : null;
             if (error && error.reason && error.reason.match(/^Stopping/) === null) {
                 // If jslint stops next, this was an actual error
                 if (nextError && nextError.reason && nextError.reason.match(/^Stopping/) !== null) {
